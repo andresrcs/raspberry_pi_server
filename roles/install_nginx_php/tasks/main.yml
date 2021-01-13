@@ -1,0 +1,39 @@
+---
+- name: Install Nginx and PHP packages
+  apt:
+    name:
+      - nginx
+      - php-fpm
+    state: latest
+
+- name: "Update list of installed packages"
+  package_facts:
+    manager: "apt"
+
+- name: Create html directory
+  file:
+    path: /var/www/html
+    owner: "{{ ansible_user }}"
+    group: www-data
+    mode: '0777'
+    state: directory
+
+- name: Get PHP major version
+  set_fact:
+    php_major_version: "{{ ansible_facts.packages['php-fpm'][0].version |\n
+    regex_search('(?<=\\d:)\\d\\.\\d', multiline=True) | trim }}"
+
+- name: Remove default sites file
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Create Nginx sites configuration file
+  template:
+    src: default_site.j2
+    dest: /etc/nginx/sites-enabled/default_site
+    owner: root
+    group: root
+    mode: '0644'
+    force: false
+  notify: restart_nginx

@@ -1,0 +1,56 @@
+---
+- name: Install PostgreSQL libraries
+  apt:
+    name:
+      - libpq-dev
+      - postgresql
+      - postgresql-client
+      - postgresql-client-common
+      - python3-psycopg2
+    state: present
+
+- name: "Update list of installed packages"
+  package_facts:
+    manager: "apt"
+
+- name: Get PostgreSQL major version
+  set_fact:
+    postgresql_major: "{{ ansible_facts.packages['postgresql'][0].version\n
+    | regex_search('^\\d{2}', multiline=True) | trim }}"
+
+- name: Configure PostgreSQL access rules
+  postgresql_pg_hba:
+    dest: /etc/postgresql/{{ postgresql_major }}/main/pg_hba.conf
+    contype: "{{ item.contype }}"
+    users: "{{ item.users }}"
+    address: "{{ item.address }}"
+    databases: all
+    method: "{{ item.method }}"
+  with_items: "{{ postgresql_rules }}"
+  notify:
+    - restart_postgresql
+
+- name: Force restart_postgresql handler
+  meta: flush_handlers
+
+- name: Configure PostgreSQL options
+  postgresql_set:
+    name: listen_addresses
+    value: '*'
+  notify:
+    - restart_postgresql
+
+- name: Force restart_postgresql handler
+  meta: flush_handlers
+
+- name: Create the main user
+  postgresql_user:
+    name: "{{ ansible_user }}"
+    password: "{{ postgres_password }}"
+    state: present
+
+- name: Create the main database
+  postgresql_db:
+    name: "{{ ansible_user }}"
+    owner: "{{ ansible_user }}"
+    state: present

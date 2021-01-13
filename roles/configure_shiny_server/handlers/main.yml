@@ -1,0 +1,10 @@
+---
+- name: restart_shiny
+  systemd:
+    name: shiny-server
+    state: restarted
+
+- name: restart_nginx
+  service:
+    name: nginx
+    state: restarted

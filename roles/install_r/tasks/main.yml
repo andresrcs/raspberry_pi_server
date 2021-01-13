@@ -1,0 +1,80 @@
+---
+- name: Install system dependencies
+  apt:
+    name:
+      - gfortran
+      - libreadline6-dev
+      - libx11-dev
+      - libxt-dev
+      - libpng-dev
+      - libjpeg-dev
+      - libcairo2-dev
+      - xvfb
+      - libbz2-dev
+      - libzstd-dev
+      - liblzma-dev
+      - libssh-dev
+      - libcurl4-openssl-dev
+      - zlib1g-dev
+      - texinfo
+      - texlive
+      - texlive-fonts-extra
+      - screen
+      - wget
+      - libpcre2-dev
+      - openjdk-11-jdk
+    state: present
+
+- name: Check R version installed
+  command: "R --version"
+  register: version_r
+  changed_when: false
+  failed_when: false
+
+- block:
+    - name: Download R source
+      unarchive:
+        src: "https://cran.rstudio.com/src/base/R-{{ r_version\n
+        | regex_search('^\\d', multiline=True)\n
+        | trim }}/R-{{ r_version }}.tar.gz"
+        remote_src: true
+        dest: /usr/local/src
+        creates: "/usr/local/src/R-{{ r_version }}"
+
+    - name: Configure R compilation
+      command:
+        cmd: ./configure --enable-R-shlib --with-blas --with-lapack
+        chdir: "/usr/local/src/R-{{ r_version }}"
+        creates: "/usr/local/src/R-{{ r_version }}/Makeconf"
+
+    - name: Compile R
+      make:
+        chdir: "/usr/local/src/R-{{ r_version }}"
+
+    - name: Install R
+      make:
+        chdir: "/usr/local/src/R-{{ r_version }}"
+        target: install
+
+    - name: Create the site-library folder
+      file:
+        path: /usr/local/lib/R/site-library/
+        state: directory
+        mode: "0777"
+        recurse: true
+
+    - name: Enable parallel installation of R packages and enable cairo
+      lineinfile:
+        path: /usr/local/lib/R/etc/Rprofile.site
+        line: "{{ item }}"
+        create: true
+        insertafter: EOF
+      with_items:
+        - options(Ncpus = 4)
+        - options(bitmapType='cairo')
+  when: "r_version|string not in version_r|string"
+
+- name: Remove installation files
+  file:
+    path: "/usr/local/src/R-{{ r_version }}"
+    state: absent

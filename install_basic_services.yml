@@ -1,0 +1,60 @@
+---
+- name: Install Basic Services and Configurations
+  hosts: raspberries
+  become: true
+
+  vars_files:
+    - vars/config_vars.yml
+
+  pre_tasks:
+    - name: Update packages
+      import_role:
+        name: update_packages
+      tags: always
+
+    - name: Set security configurations
+      import_role:
+        name: secure_server
+      tags: secure
+
+    - name: Add Swap memory
+      import_role:
+        name: add_swap
+      tags: swap
+
+  tasks:
+    - name: Install common system dependencies
+      apt:
+        name:
+          - openssl
+          - libssl-dev
+          - cmake
+          - g++
+          - git
+        state: present
+
+    - name: Install and configure Nginx + PHP
+      import_role:
+        name: install_nginx_php
+      tags: nginx
+
+    - name: Install and configure Postgresql
+      import_role:
+        name: install_postgresql
+      tags: postgresql
+
+    - name: Install R from source
+      import_role:
+        name: install_r
+      tags: r
+
+    - name: Disable Wifi interface
+      blockinfile:
+        path: /boot/config.txt
+        block: |
+          # Disable Wifi & Bluetooth
+          dtoverlay=disable-bt
+          dtoverlay=disable-wifi
+        state: present
+      notify: reboot_raspberry
+      when: disable_wifi

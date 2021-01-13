@@ -1,0 +1,9 @@
+---
+- name: Install basic services
+  import_playbook: install_basic_services.yml
+
+- name: Install Shiny Server
+  import_playbook: install_shiny_server.yml
+
+- name: Install RStudio Server
+  import_playbook: install_rstudio_server.yml

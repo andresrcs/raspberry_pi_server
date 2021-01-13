@@ -1,0 +1,37 @@
+---
+- name: Install and Configure Shiny Server
+  hosts: raspberries
+  become: true
+
+  vars_files:
+    - vars/config_vars.yml
+
+  tasks:
+    - name: Define R package dependencies
+      set_fact:
+        shiny_dependencies: "c('later', 'fs', 'Rcpp', 'httpuv', 'mime',
+           'jsonlite', 'digest', 'htmltools',
+           'xtable', 'R6', 'Cairo', 'sourcetools', 'shiny', 'rmarkdown')"
+
+    - name: Install R package dependencies
+      become_flags: 'su - -c'
+      shell: "R -e \"install.packages({{ shiny_dependencies }}
+        [!({{ shiny_dependencies }} %in% installed.packages())],
+         repos='http://cran.rstudio.com/',
+         lib='/usr/local/lib/R/site-library')\""
+      register: r_install
+      changed_when: r_install.stderr != ""
+
+    - name: Install Shiny server from source
+      include_role:
+        name: install_shiny_server
+        apply:
+          tags: shiny_server
+      tags: shiny_server
+
+    - name: Congifure Shiny server
+      include_role:
+        name: configure_shiny_server
+        apply:
+          tags: configure_shiny
+      tags: configure_shiny

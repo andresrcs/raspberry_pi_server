@@ -1,0 +1,164 @@
+---
+- name: Get current RStudio version
+  command: "cat /usr/local/lib/rstudio-server/VERSION"
+  register: version_rstudio
+  changed_when: false
+  failed_when: false
+
+- block:
+  - name: Clone RStudio repository
+    git:
+      repo: https://github.com/rstudio/rstudio.git
+      version: "{{ rstudio_version }}"
+      accept_hostkey: true
+      clone: true
+      depth: 1
+      force: true
+      dest: rstudio
+
+  - name: Create closure folder
+    file:
+      path: closure
+      state: directory
+
+  - name: Download latest version of Closure Compiler
+    unarchive:
+      src: https://dl.google.com/closure-compiler/compiler-20200719.zip
+      remote_src: true
+      dest: closure
+      creates: closure/closure-compiler-v20200719.jar
+
+  - name: Replace Closure Compiler with latest version
+    copy:
+      src: closure/closure-compiler-v20200719.jar
+      dest: rstudio/src/gwt/tools/compiler/compiler.jar
+      remote_src: true
+
+  - name: Remove Closure Compiler folder
+    file:
+      path: closure
+      state: absent
+
+  - name: Install Debian specific system dependencies
+    apt:
+      name:
+        - ant
+        - bzip2
+        - clang
+        - cmake
+        - debsigs
+        - dpkg-sig
+        - expect
+        - fakeroot
+        - gcc
+        - gnupg1
+        - libacl1-dev
+        - libattr1-dev
+        - libboost-all-dev
+        - libcap-dev
+        - libcurl4-openssl-dev
+        - libffi-dev
+        - libglib2.0-dev
+        - libpam0g-dev
+        - libpango-1.0-0
+        - libuser1-dev
+        - libxml-commons-external-java
+        - lsof
+        - make
+        - mesa-common-dev
+        - openjdk-11-jdk
+        - patchelf
+        - python
+        - rrdtool
+        - uuid-dev
+        - wget
+        - zlib1g
+      state: present
+      autoremove: true
+      autoclean: true
+
+  - name: Avoid insalling sentry-cli
+    lineinfile:
+      dest: rstudio/dependencies/common/install-common
+      regexp: ./install-sentry-cli
+      line: "#./install-sentry-cli"
+      state: present
+
+  - name: Install common system dependencies
+    shell:
+      cmd: RSTUDIO_DISABLE_CRASHPAD=1 ./install-common
+      chdir: rstudio/dependencies/common
+
+  - name: Create build folder
+    file:
+      path: rstudio/build
+      state: directory
+
+  - name: Compile RStudio with Cmake
+    command:
+      cmd: cmake .. -DRSTUDIO_TARGET=Server -DCMAKE_BUILD_TYPE=Release
+      chdir: rstudio/build
+
+  - name: Install RStudio
+    make:
+      chdir: rstudio/build
+      target: install
+
+  - name: Save the actual RStudio-server version installed
+    lineinfile:
+      path: /usr/local/lib/rstudio-server/VERSION
+      regexp: '^99\\.9\\.9'
+      line: "{{ rstudio_version }}"
+      state: present
+      create: true
+
+  - name: Install rstudio-server startup files
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      remote_src: true
+      owner: root
+      group: root
+      mode: "0755"
+    with_items:
+      - src: /usr/local/lib/rstudio-server/extras/init.d/debian/rstudio-server
+        dest: /etc/init.d/rstudio-server
+      - src: /usr/local/lib/rstudio-server/extras/systemd/rstudio-server.service
+        dest: /lib/systemd/system/rstudio-server.service
+      - src: /usr/local/lib/rstudio-server/extras/upstart/rstudio-server.conf
+        dest: /etc/init/rstudio-server.conf
+
+  - name: Modify rstudio-server init file to use the compiled version of RStudio
+    lineinfile:
+      path: /etc/init.d/rstudio-server
+      regexp: "^PATH=/"
+      line: "PATH=/usr/local/bin/:/sbin:/usr/sbin:/bin:/usr/bin"
+
+  - name: Create symlink for RStudio
+    file:
+      path: /usr/sbin/rstudio-server
+      src: /usr/local/lib/rstudio-server/bin/rstudio-server
+      force: true
+      state: link
+      owner: root
+
+  - name: Update the System V style init script links
+    sysvinit:
+      arguments: defaults
+      daemonize: true
+      enabled: true
+      name: rstudio-server
+      state: started
+
+  - name: Reload systemd, enable and start Rstudio server
+    systemd:
+      daemon_reload: true
+      name: rstudio-server
+      enabled: true
+      state: restarted
+  when: "rstudio_version|string not in version_rstudio|string"
+
+- name: Remove installation files
+  file:
+    path: rstudio/
+    state: absent

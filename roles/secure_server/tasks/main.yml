@@ -1,0 +1,84 @@
+---
+- name: Update SSH configuration to be more secure
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    validate: 'sshd -t -f %s'
+  with_items:
+    - regexp: "^#?PasswordAuthentication"
+      line: "PasswordAuthentication no"
+    - regexp: "^#?PermitRootLogin"
+      line: "PermitRootLogin no"
+  notify: restart_ssh
+
+- name: Install ufw firewall
+  apt:
+    name:
+      - ufw
+    state: present
+  notify: reboot_raspberry
+
+- name: Force reboot_raspberry handler
+  meta: flush_handlers
+
+- name: Configure open ports
+  ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  with_items: "{{ exposed_ports }}"
+
+- name: Configure default incoming/outgoing rules with ufw
+  ufw:
+    direction: "{{ item.direction }}"
+    policy: "{{ item.policy }}"
+    state: enabled
+  with_items:
+    - {direction: outgoing, policy: allow}
+    - {direction: incoming, policy: deny}
+
+- name: Install fail2ban
+  apt:
+    name:
+      - fail2ban
+    state: present
+
+- name: Make sure fail2ban is started and enabled
+  service:
+    name: fail2ban
+    enabled: true
+    state: started
+
+- name: Copy configuration files for fail2ban
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    mode: "0644"
+    force: false
+  with_items:
+    - src: jail.local
+      dest: /etc/fail2ban/jail.local
+    - src: nginx-auth.conf
+      dest: /etc/fail2ban/filter.d/nginx-auth.conf
+    - src: nginx-login.conf
+      dest: /etc/fail2ban/filter.d/nginx-login.conf
+    - src: nginx-noscript.conf
+      dest: /etc/fail2ban/filter.d/nginx-noscript.conf
+  notify: restart_fail2ban
+
+- block:
+  - name: Install sendmail
+    apt:
+      name: sendmail
+      state: present
+
+  - name: Set email notificacion for fail2ban
+    lineinfile:
+      path: /etc/fail2ban/jail.local
+      regexp: "destemail ="
+      line: "destemail = {{ fail2ban_email }}"
+    notify: restart_fail2ban
+  when: send_email

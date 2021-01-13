@@ -1,0 +1,142 @@
+---
+- name: Check shiny-server version installed
+  command: "shiny-server --version"
+  register: version_shiny
+  changed_when: false
+  failed_when: false
+
+- block:
+  - name: Clone shiny-server repository
+    git:
+      repo: "https://github.com/rstudio/shiny-server.git"
+      clone: true
+      dest: "shiny-server"
+      version: "{{ shiny_server_version }}"
+      accept_hostkey: true
+      force: true
+
+  - name: Create tmp and build folders
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - "shiny-server/tmp"
+      - "shiny-server/build"
+
+  - name: Get Node.js version to install
+    command:
+      cmd: cat .nvmrc
+      chdir: "shiny-server"
+    register: node_version
+    changed_when: false
+
+  - name: Donwload SHASUMS256.txt file for Node.js
+    get_url:
+      url: "https://nodejs.org/dist/{{ node_version.stdout }}/SHASUMS256.txt"
+      dest: "shiny-server/SHASUMS256.txt"
+
+  - name: Read SHASUMS256.txt file
+    command:
+      cmd: cat SHASUMS256.txt
+      chdir: "shiny-server"
+    register: SHASUMS256
+    changed_when: false
+
+  - name: Get SHASUM256 for the specific armv7l version
+    set_fact:
+      node_sha: "{{ SHASUMS256.stdout\n
+      | regex_search('^.+(?=\\snode\\-v.+\\-linux\\-armv7l\\.tar\\.xz)',\n
+      multiline=True) | trim }}"
+
+  - name: Modify installation script for Node.js to use the armv7l version
+    lineinfile:
+      path: "shiny-server/external/node/install-node.sh"
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    with_items:
+      - regexp: "^NODE_SHA256"
+        line: "NODE_SHA256={{ node_sha }}"
+      - regexp: "^\\s{2}local NODE_FILENAME="
+        line: "  local NODE_FILENAME=\"node-${NODE_VERSION}-linux-armv7l.tar.xz\""
+      - regexp: "^\\s{2}local NODE_URL="
+        line: "  local NODE_URL=\"https://nodejs.org/dist/${NODE_VERSION}/${NODE_FILENAME}\""
+
+  - name: Execute install_node.sh script
+    shell:
+      cmd: ./external/node/install-node.sh
+      chdir: shiny-server
+
+  - name: Prepare the make step with cmake
+    shell:
+      cmd: |
+        PYTHON=`which python3`
+        DIR=`pwd`
+        PATH=$DIR/../bin:$PATH
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DPYTHON="$PYTHON" ../
+      chdir: "shiny-server/tmp"
+      creates: cmake_install.cmake
+
+  - name: Compile Shiny
+    make:
+      chdir: "shiny-server/tmp"
+
+  - name: Rebuild npm
+    shell:
+      cmd: |
+        DIR=`pwd`
+        PATH=$DIR/../bin:$PATH
+        PYTHON=`which python3`
+        (cd .. && ./bin/npm --python="${PYTHON}" install --no-optional)
+        (cd .. && ./bin/node ./ext/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js --python="${PYTHON}" rebuild)
+      chdir: shiny-server/tmp
+
+  - name: Install shiny-server
+    make:
+      chdir: "shiny-server/tmp"
+      target: install
+
+  - name: Make sure /etc/shiny-server folder exist
+    file:
+      path: /etc/shiny-server/
+      state: directory
+
+  - name: Install default config files
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      remote_src: "{{ item.remote_src }}"
+      owner: root
+      mode: "0644"
+    with_items:
+      - src: shiny-server/config/default.config
+        dest: /etc/shiny-server/shiny-server.conf
+        remote_src: true
+      - src: shiny-server/config/upstart/shiny-server.conf
+        dest: /etc/init/shiny-server.conf
+        remote_src: true
+      - src: shiny-server.service
+        dest: /lib/systemd/system/shiny-server.service
+        remote_src: false
+
+  - name: Create symlink for shiny-server
+    file:
+      path: /usr/bin/shiny-server
+      src: /usr/local/shiny-server/bin/shiny-server
+      state: link
+      owner: root
+
+  - name: Make sure shiny-server is started
+    systemd:
+      daemon_reload: true
+      name: shiny-server
+      enabled: true
+      state: started
+
+  when: "shiny_server_version |\n
+      regex_search('^v\\d\\.\\d+\\.\\d+', multiline=True) |\n
+      trim | string not in version_shiny | string"
+
+- name: Remove installation files
+  file:
+    path: shiny-server/
+    state: absent
