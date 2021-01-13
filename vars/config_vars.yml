@@ -50,7 +50,7 @@ postgresql_rules:
 r_version: '4.0.3'
 
 # Shiny-server version to install
-shiny_server_version: v1.5.15.953
+shiny_server_version: v1.5.16.958
 
 # RStudio version to install
 rstudio_version: v1.3.1093
