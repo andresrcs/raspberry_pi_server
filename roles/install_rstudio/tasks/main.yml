@@ -39,6 +39,21 @@
       path: closure
       state: absent
 
+  - name: Add apt_key for yarn
+    apt_key:
+      url: https://dl.yarnpkg.com/debian/pubkey.gpg
+      state: present
+
+  - name: Add repository for yarn
+    apt_repository:
+      repo: deb https://dl.yarnpkg.com/debian/ stable main
+      state: present
+      filename: yarn
+
+  - name: Update apt repo and cache
+    apt:
+      update_cache: true
+
   - name: Install Debian specific system dependencies
     apt:
       name:
@@ -73,6 +88,9 @@
         - uuid-dev
         - wget
         - zlib1g
+        - sqlite3
+        - libsqlite3-dev
+        - yarn
       state: present
       autoremove: true
       autoclean: true
@@ -83,6 +101,18 @@
       regexp: ./install-sentry-cli
       line: "#./install-sentry-cli"
       state: present
+
+  - name: Select Node version for armv7l
+    lineinfile:
+      dest: rstudio/dependencies/common/install-npm-dependencies
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+      state: present
+    with_items:
+      - regexp: "\"Linux-64\""
+        line: "  \"Linux-32\")"
+      - regexp: "NODE_FILE=.+linux-x64\""
+        line: "    NODE_FILE=\"node-v${NODE_VERSION}-linux-armv7l\""
 
   - name: Install common system dependencies
     shell:
