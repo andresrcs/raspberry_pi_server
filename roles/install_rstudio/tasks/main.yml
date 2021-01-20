@@ -137,7 +137,7 @@
   - name: Save the actual RStudio-server version installed
     lineinfile:
       path: /usr/local/lib/rstudio-server/VERSION
-      regexp: '^99\\.9\\.9'
+      regexp: '^99\.9\.9'
       line: "{{ rstudio_version }}"
       state: present
       create: true
