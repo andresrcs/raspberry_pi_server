@@ -43,6 +43,8 @@ postgresql_rules:
   - { contype: local, users: postgres, address: samehost, method: trust }
   - { contype: host, users: all, address: "{{ ansible_default_ipv4.network }}/24", method: trust }
   - { contype: host, users: all, address: 0.0.0.0/0, method: password }
+  - { contype: host, users: all, address: 127.0.0.1/32, method: md5 }
+  - { contype: host, users: all, address: ::1/128, method: trust }
 
 # Main Software Versions #######################################################
 
@@ -50,7 +52,7 @@ postgresql_rules:
 r_version: '4.1.2'
 
 # Shiny-server version to install
-shiny_server_version: v1.5.16.958
+shiny_server_version: 'v1.5.17.973'
 
 # RStudio version to install
-rstudio_version: v1.4.1103
+rstudio_version: 'v2021.09.1+372'

@@ -42,13 +42,13 @@
     register: SHASUMS256
     changed_when: false
 
-  - name: Get SHASUM256 for the specific armv7l version
+  - name: Get SHASUM256 for the specific ARM version
     set_fact:
       node_sha: "{{ SHASUMS256.stdout\n
-      | regex_search('^.+(?=\\snode\\-v.+\\-linux\\-armv7l\\.tar\\.xz)',\n
+      | regex_search('^.+(?=\\snode\\-v.+\\-linux\\-' + node_arch + '\\.tar\\.xz)',\n
       multiline=True) | trim }}"
 
-  - name: Modify installation script for Node.js to use the armv7l version
+  - name: Modify installation script for Node.js to use the ARM version
     lineinfile:
       path: "shiny-server/external/node/install-node.sh"
       regexp: "{{ item.regexp }}"
@@ -57,7 +57,7 @@
       - regexp: "^NODE_SHA256"
         line: "NODE_SHA256={{ node_sha }}"
       - regexp: "^\\s{2}local NODE_FILENAME="
-        line: "  local NODE_FILENAME=\"node-${NODE_VERSION}-linux-armv7l.tar.xz\""
+        line: "  local NODE_FILENAME=\"node-${NODE_VERSION}-linux-{{ node_arch }}.tar.xz\""
       - regexp: "^\\s{2}local NODE_URL="
         line: "  local NODE_URL=\"https://nodejs.org/dist/${NODE_VERSION}/${NODE_FILENAME}\""
 
@@ -117,6 +117,12 @@
       - src: shiny-server.service
         dest: /lib/systemd/system/shiny-server.service
         remote_src: false
+
+  - name: Modify shiny-server init.d file to use the compiled version of R
+    lineinfile:
+      path: /etc/init.d/shiny-server
+      regexp: "^PATH=/"
+      line: "PATH=/usr/local/bin/:/sbin:/usr/sbin:/bin:/usr/bin"
 
   - name: Create symlink for shiny-server
     file:

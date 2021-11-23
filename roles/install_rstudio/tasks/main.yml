@@ -1,6 +1,6 @@
 ---
 - name: Get current RStudio version
-  command: "cat /usr/local/lib/rstudio-server/VERSION"
+  command: "cat /usr/local/VERSION"
   register: version_rstudio
   changed_when: false
   failed_when: false
@@ -95,14 +95,19 @@
       autoremove: true
       autoclean: true
 
-  - name: Avoid insalling sentry-cli
+  - name: Avoid insalling non ARM available dependencies
     lineinfile:
       dest: rstudio/dependencies/common/install-common
-      regexp: ./install-sentry-cli
-      line: "#./install-sentry-cli"
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
       state: present
+    with_items:
+      - regexp: ./install-sentry-cli
+        line: "#./install-sentry-cli"
+      - regexp: ./install-quarto
+        line: "#./install-quarto"
 
-  - name: Select Node version for armv7l
+  - name: Select Node version for ARM architecture
     lineinfile:
       dest: rstudio/dependencies/common/install-npm-dependencies
       regexp: "{{ item.regexp }}"
@@ -110,9 +115,9 @@
       state: present
     with_items:
       - regexp: "\"Linux-64\""
-        line: "  \"Linux-32\")"
+        line: "  \"Linux-{{ linux_arch }}\")"
       - regexp: "NODE_FILE=.+linux-x64\""
-        line: "    NODE_FILE=\"node-v${NODE_VERSION}-linux-armv7l\""
+        line: "    NODE_FILE=\"node-v${NODE_VERSION}-linux-{{ node_arch }}\""
 
   - name: Install common system dependencies
     shell:
@@ -136,8 +141,8 @@
 
   - name: Save the actual RStudio-server version installed
     lineinfile:
-      path: /usr/local/lib/rstudio-server/VERSION
-      regexp: '^99\.9\.9'
+      path: /usr/local/VERSION
+      regexp: '999$'
       line: "{{ rstudio_version }}"
       state: present
       create: true
@@ -151,12 +156,10 @@
       group: root
       mode: "0755"
     with_items:
-      - src: /usr/local/lib/rstudio-server/extras/init.d/debian/rstudio-server
+      - src: /usr/local/extras/init.d/debian/rstudio-server
         dest: /etc/init.d/rstudio-server
-      - src: /usr/local/lib/rstudio-server/extras/systemd/rstudio-server.service
+      - src: /usr/local/extras/systemd/rstudio-server.service
         dest: /lib/systemd/system/rstudio-server.service
-      - src: /usr/local/lib/rstudio-server/extras/upstart/rstudio-server.conf
-        dest: /etc/init/rstudio-server.conf
 
   - name: Modify rstudio-server init file to use the compiled version of RStudio
     lineinfile:
@@ -167,7 +170,7 @@
   - name: Create symlink for RStudio
     file:
       path: /usr/sbin/rstudio-server
-      src: /usr/local/lib/rstudio-server/bin/rstudio-server
+      src: /usr/local/bin/rstudio-server
       force: true
       state: link
       owner: root

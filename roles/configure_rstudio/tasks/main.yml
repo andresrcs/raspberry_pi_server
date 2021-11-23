@@ -36,9 +36,9 @@
     state: link
     force: true
   with_items:
-    - path: /usr/local/lib/rstudio-server/bin/pandoc
+    - path: /usr/local/bin/pandoc/pandoc
       src: /usr/bin/pandoc
-    - path: /usr/local/lib/rstudio-server/bin/pandoc-citeproc
+    - path: /usr/local/bin/pandoc/pandoc-citeproc
       src: /usr/bin/pandoc-citeproc
 
 - name: Check if default_site file exists

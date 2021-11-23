@@ -5,11 +5,13 @@ Description=ShinyServer
 [Service]
 Type=simple
 ExecStart=/usr/bin/shiny-server
-Restart=always
-
+KillMode=process
 ExecReload=/bin/kill -HUP $MAINPID
 ExecStopPost=/bin/sleep 5
+Restart=on-failure
 RestartSec=1
+StartLimitInterval=45
+StartLimitBurst=3
 
 [Install]
 WantedBy=multi-user.target
