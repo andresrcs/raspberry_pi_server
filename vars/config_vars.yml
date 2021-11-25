@@ -44,7 +44,7 @@ postgresql_rules:
   - { contype: host, users: all, address: "{{ ansible_default_ipv4.network }}/24", method: trust }
   - { contype: host, users: all, address: 0.0.0.0/0, method: password }
   - { contype: host, users: all, address: 127.0.0.1/32, method: md5 }
-  - { contype: host, users: all, address: ::1/128, method: trust }
+  - { contype: host, users: all, address: '::1/128', method: trust }
 
 # Main Software Versions #######################################################
 
