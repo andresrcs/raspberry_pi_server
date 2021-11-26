@@ -111,8 +111,8 @@
       - src: shiny-server/config/default.config
         dest: /etc/shiny-server/shiny-server.conf
         remote_src: true
-      - src: shiny-server/config/upstart/shiny-server.conf
-        dest: /etc/init/shiny-server.conf
+      - src: shiny-server/config/init.d/debian/shiny-server
+        dest: /etc/init.d/shiny-server
         remote_src: true
       - src: shiny-server.service
         dest: /lib/systemd/system/shiny-server.service
