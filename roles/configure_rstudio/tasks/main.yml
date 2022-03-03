@@ -22,24 +22,12 @@
     - path: /var/lib/rstudio-server
       mode: "0755"
 
-- name: Install pandoc library
+- name: Install pandoc system library
   apt:
     name:
       - pandoc
       - pandoc-citeproc
     state: present
-
-- name: Create symlinks for the system version of pandoc
-  file:
-    path: "{{ item.path }}"
-    src: "{{ item.src }}"
-    state: link
-    force: true
-  with_items:
-    - path: /usr/local/bin/pandoc/pandoc
-      src: /usr/bin/pandoc
-    - path: /usr/local/bin/pandoc/pandoc-citeproc
-      src: /usr/bin/pandoc-citeproc
 
 - name: Check if default_site file exists
   stat:

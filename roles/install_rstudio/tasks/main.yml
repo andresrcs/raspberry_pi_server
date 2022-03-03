@@ -161,7 +161,7 @@
       - src: /usr/local/extras/systemd/rstudio-server.service
         dest: /lib/systemd/system/rstudio-server.service
 
-  - name: Modify rstudio-server init file to use the compiled version of RStudio
+  - name: Modify rstudio-server init file to use the compiled version of R
     lineinfile:
       path: /etc/init.d/rstudio-server
       regexp: "^PATH=/"
