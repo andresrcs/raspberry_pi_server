@@ -80,7 +80,18 @@
     make:
       chdir: "shiny-server/tmp"
 
-  - name: Rebuild npm
+  - name: Modify SHASUMS for optimist npm module
+    lineinfile:
+      path: "shiny-server/npm-shrinkwrap.json"
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    with_items:
+      - regexp: '"integrity": "sha512-3RAVyfbptsR6HOFA0BFNLyw8ZXXDRWf5P3tIslbNt12kTikaRWepRR9vLHMyibIZeNfScI9uGqcn1KfbIAeuXA==",'
+        line: '"integrity": "sha512-ZwrJM2WaOJesJGZlejLqAiBAE6Ts2PZNk1pQ/x1uTMsQw83BaXWShjqCbhh5bPQUNrlx2Ijz1dOr0hLmlkxKag==",'
+      - regexp: '"integrity": "sha512-3RAVyfbptsR6HOFA0BFNLyw8ZXXDRWf5P3tIslbNt12kTikaRWepRR9vLHMyibIZeNfScI9uGqcn1KfbIAeuXA==",'
+        line: '"integrity": "sha512-ZwrJM2WaOJesJGZlejLqAiBAE6Ts2PZNk1pQ/x1uTMsQw83BaXWShjqCbhh5bPQUNrlx2Ijz1dOr0hLmlkxKag==",'
+
+  - name: Install and rebuild npm dependencies
     shell:
       cmd: |
         DIR=`pwd`
