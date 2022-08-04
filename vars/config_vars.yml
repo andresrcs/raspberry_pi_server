@@ -49,10 +49,10 @@ postgresql_rules:
 # Main Software Versions #######################################################
 
 # R version to install
-r_version: '4.2.0'
+r_version: '4.2.1'
 
 # Shiny-server version to install
-shiny_server_version: 'v1.5.18.987'
+shiny_server_version: 'v1.5.19.995'
 
 # RStudio version to install
 rstudio_version: 'v2021.09.1+372'
