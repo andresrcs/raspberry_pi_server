@@ -33,9 +33,9 @@
           - git
         state: present
 
-    - name: Install and configure Nginx + PHP
+    - name: Install and configure Nginx
       import_role:
-        name: install_nginx_php
+        name: install_nginx
       tags: nginx
 
     - name: Install and configure Postgresql

@@ -1,14 +1,9 @@
 ---
-- name: Install Nginx and PHP packages
+- name: Install Nginx
   apt:
     name:
       - nginx
-      - php-fpm
     state: latest
-
-- name: "Update list of installed packages"
-  package_facts:
-    manager: "apt"
 
 - name: Create html directory
   file:
@@ -17,11 +12,6 @@
     group: www-data
     mode: '0777'
     state: directory
-
-- name: Get PHP major version
-  set_fact:
-    php_major_version: "{{ ansible_facts.packages['php-fpm'][0].version |\n
-    regex_search('(?<=\\d:)\\d\\.\\d', multiline=True) | trim }}"
 
 - name: Remove default sites file
   file:

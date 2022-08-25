@@ -30,10 +30,6 @@ exposed_ports:
   - { rule: 'allow', port: 5432, proto: 'tcp' }   # Postgresql
   - { rule: 'allow', port: 5432, proto: 'udp' }
 
-# Notification email for fail2ban
-send_email: true
-fail2ban_email: your_email@something.com
-
 # Password for the main PostgreSQL user
 postgres_password: 'very_secure_password'
 

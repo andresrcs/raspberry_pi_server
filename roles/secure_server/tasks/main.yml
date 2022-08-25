@@ -68,17 +68,3 @@
     - src: nginx-noscript.conf
       dest: /etc/fail2ban/filter.d/nginx-noscript.conf
   notify: restart_fail2ban
-
-- block:
-  - name: Install sendmail
-    apt:
-      name: sendmail
-      state: present
-
-  - name: Set email notificacion for fail2ban
-    lineinfile:
-      path: /etc/fail2ban/jail.local
-      regexp: "destemail ="
-      line: "destemail = {{ fail2ban_email }}"
-    notify: restart_fail2ban
-  when: send_email
