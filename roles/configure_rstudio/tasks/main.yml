@@ -69,4 +69,11 @@
       marker: "# <!-- {mark} ANSIBLE MANAGED BLOCK #3 -->"
       insertbefore: "location / {"
     notify: restart_nginx
+
+  - name: Delay nginx start to give rstudio-server time to load
+    lineinfile:
+      path: /etc/systemd/system/multi-user.target.wants/nginx.service
+      regexp: '^After=network'
+      line: 'After=network-online.target nss-lookup.target'
+      state: present
   when: nginx_file_check.stat.exists
