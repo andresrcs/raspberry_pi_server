@@ -10,7 +10,7 @@
     path: /var/www/html
     owner: "{{ ansible_user }}"
     group: www-data
-    mode: '0777'
+    mode: '0775'
     state: directory
 
 - name: Remove default sites file

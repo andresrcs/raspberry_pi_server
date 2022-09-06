@@ -30,6 +30,7 @@
           - libssl-dev
           - cmake
           - g++
+          - gcc
           - git
         state: present
 
@@ -37,24 +38,15 @@
       import_role:
         name: install_nginx
       tags: nginx
+      when: install_nginx
 
     - name: Install and configure Postgresql
       import_role:
         name: install_postgresql
       tags: postgresql
+      when: install_postgresql
 
-    - name: Install R from source
+    - name: Install R
       import_role:
         name: install_r
       tags: r
-
-    - name: Disable Wifi interface
-      blockinfile:
-        path: /boot/config.txt
-        block: |
-          # Disable Wifi & Bluetooth
-          dtoverlay=disable-bt
-          dtoverlay=disable-wifi
-        state: present
-      notify: reboot_raspberry
-      when: disable_wifi

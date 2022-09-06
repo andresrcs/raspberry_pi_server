@@ -1,30 +1,4 @@
 ---
-- name: Install system dependencies
-  apt:
-    name:
-      - gfortran
-      - libreadline6-dev
-      - libx11-dev
-      - libxt-dev
-      - libpng-dev
-      - libjpeg-dev
-      - libcairo2-dev
-      - xvfb
-      - libbz2-dev
-      - libzstd-dev
-      - liblzma-dev
-      - libssh-dev
-      - libcurl4-openssl-dev
-      - zlib1g-dev
-      - texinfo
-      - texlive
-      - texlive-fonts-extra
-      - screen
-      - wget
-      - libpcre2-dev
-      - openjdk-11-jdk
-    state: present
-
 - name: Check R version installed
   command: "R --version"
   register: version_r
@@ -32,6 +6,35 @@
   failed_when: false
 
 - block:
+    - name: Install system dependencies
+      apt:
+        name:
+          - gfortran
+          - libreadline-dev
+          - libx11-dev
+          - libxt-dev
+          - libpng-dev
+          - libjpeg-dev
+          - libcairo2-dev
+          - xvfb
+          - libbz2-dev
+          - libzstd-dev
+          - liblzma-dev
+          - libssh-dev
+          - libblas-dev
+          - libopenblas-base
+          - liblapack-dev
+          - libcurl4-openssl-dev
+          - zlib1g-dev
+          - texinfo
+          - texlive
+          - texlive-fonts-extra
+          - screen
+          - wget
+          - libpcre2-dev
+          - openjdk-11-jdk
+        state: present
+
     - name: Download R source
       unarchive:
         src: "https://cran.rstudio.com/src/base/R-{{ r_version\n
@@ -72,9 +75,63 @@
       with_items:
         - options(Ncpus = 4)
         - options(bitmapType='cairo')
-  when: "r_version|string not in version_r|string"
 
-- name: Remove installation files
-  file:
-    path: "/usr/local/src/R-{{ r_version }}"
-    state: absent
+    - name: Remove installation files
+      file:
+        path: "/usr/local/src/R-{{ r_version }}"
+        state: absent
+  when:
+    - "r_version|string not in version_r|string"
+    - use_r4pi == false
+
+- block:
+    - name: Install the R4Pi .deb installer
+      apt:
+        deb: https://pkgs.r4pi.org/dl/r4pi-repo-conf_0.0.1-1_all.deb
+
+    - name: Update apt repo and cache
+      apt:
+        update_cache: true
+
+    - name: Install R4Pi
+      apt:
+        name:
+          - r4pi
+        state: present
+
+    - name: Create the site-library folder
+      file:
+        path: /opt/R/release/lib/R/site-library/
+        state: directory
+        mode: "0777"
+        recurse: true
+
+    - name: Enable parallel installation of R packages and cairo rendering
+      lineinfile:
+        path: /opt/R/release/lib/R/etc/Rprofile.site
+        line: "{{ item }}"
+        create: true
+        insertafter: EOF
+      with_items:
+        - options(Ncpus = 4)
+        - options(bitmapType = 'cairo')
+
+    - name: Set the package repositories to the 32-bit R4Pi repo + CRAN
+      lineinfile:
+        path: /opt/R/release/lib/R/etc/Rprofile.site
+        line: options(repos = c(R4Pi = 'https://pkgs.r4pi.org/', CRAN = 'https://cran.rstudio.com/'))
+        insertafter: EOF
+      when: linux_arch == '32'
+
+    - name: Set the package repositories to the 64-bit R4Pi repo + CRAN
+      lineinfile:
+        path: /opt/R/release/lib/R/etc/Rprofile.site
+        line: options(repos = c(R4Pi = 'https://pkgs.r4pi.org/aarch64', CRAN = 'https://cran.rstudio.com/'))
+        insertafter: EOF
+      when: linux_arch == '64'
+
+  when:
+    - version_r.stdout|length == 0
+    - use_r4pi
+    - ansible_distribution == 'Debian'
+

@@ -50,6 +50,7 @@
     name: fail2ban
     enabled: true
     state: started
+  changed_when: false
 
 - name: Copy configuration files for fail2ban
   copy:

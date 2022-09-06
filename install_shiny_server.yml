@@ -11,18 +11,49 @@
       include_vars: "vars/architecture_vars_{{ ansible_architecture }}.yml"
 
   tasks:
+    - name: Make sure system dependencies are installed
+      apt:
+        name:
+          - libcairo2-dev
+          - libxt-dev
+          - libharfbuzz-dev
+          - git
+          - cmake
+          - pandoc
+          - pandoc-citeproc
+        state: present
+
     - name: Define R package dependencies
       set_fact:
-        shiny_dependencies: "c('later', 'fs', 'Rcpp', 'httpuv', 'mime',
+        shiny_dependencies: "c('Rcpp', 'later', 'fs', 'httpuv', 'mime',
            'jsonlite', 'digest', 'htmltools',
            'xtable', 'R6', 'Cairo', 'sourcetools', 'shiny', 'rmarkdown')"
 
+    - name: Set R package repository to CRAN only
+      set_fact:
+        cran_repo: "'https://cran.rstudio.com/'"
+        package_library: "'/usr/local/lib/R/site-library'"
+
+    - name: Set R package repository to R4Pi and CRAN
+      set_fact:
+        cran_repo: "c('https://pkgs.r4pi.org', 'http://cran.rstudio.com/')"
+        package_library: "'/opt/R/release/lib/R/site-library/'"
+      when:
+        - use_r4pi
+        - linux_arch == '32'
+
+    - name: Set R package repository to 64-bit R4Pi and CRAN
+      set_fact:
+        cran_repo: "c('https://pkgs.r4pi.org/aarch64', 'http://cran.rstudio.com/')"
+        package_library: "'/opt/R/release/lib/R/site-library/'"
+      when:
+        - use_r4pi
+        - linux_arch == '64'
+
     - name: Install R package dependencies
       become_flags: 'su - -c'
-      shell: "R -e \"install.packages({{ shiny_dependencies }}
-        [!({{ shiny_dependencies }} %in% installed.packages())],
-         repos='http://cran.rstudio.com/',
-         lib='/usr/local/lib/R/site-library')\""
+      shell:
+        cmd: "R -e \"install.packages({{ shiny_dependencies }} [!({{ shiny_dependencies }} %in% installed.packages())], repos={{ cran_repo }}, lib={{ package_library }})\""
       register: r_install
       changed_when: r_install.stderr != ""
 

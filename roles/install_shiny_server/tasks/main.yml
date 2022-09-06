@@ -15,7 +15,7 @@
       accept_hostkey: true
       force: true
 
-  - name: Create tmp and build folders
+  - name: Create 'tmp' and 'build' folders
     file:
       path: "{{ item }}"
       state: directory
@@ -80,7 +80,7 @@
     make:
       chdir: "shiny-server/tmp"
 
-  - name: Modify SHASUMS for optimist npm module
+  - name: Modify SHASUMS for the 'optimist' npm module
     lineinfile:
       path: "shiny-server/npm-shrinkwrap.json"
       regexp: "{{ item.regexp }}"
@@ -129,7 +129,7 @@
         dest: /lib/systemd/system/shiny-server.service
         remote_src: false
 
-  - name: Modify shiny-server init.d file to use the compiled version of R
+  - name: Modify shiny-server init.d file to make sure it can find compiled R
     lineinfile:
       path: /etc/init.d/shiny-server
       regexp: "^PATH=/"

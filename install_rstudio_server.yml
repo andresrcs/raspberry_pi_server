@@ -11,12 +11,20 @@
       include_vars: "vars/architecture_vars_{{ ansible_architecture }}.yml"
 
   tasks:
-    - name: Install RStudio server from source
-      import_role:
-        name: install_rstudio
-      tags: rstudio
+    - block:
+        - name: Make sure system dependencies are installed
+          apt:
+            name:
+              - gdebi
+            state: present
 
-    - name: Configure RStudio
-      import_role:
-        name: configure_rstudio
-      tags: configure_rstudio
+        - name: Install RStudio server
+          import_role:
+            name: install_rstudio
+          tags: rstudio
+
+        - name: Configure RStudio
+          import_role:
+            name: configure_rstudio
+          tags: configure_rstudio
+      when: linux_arch == '64'

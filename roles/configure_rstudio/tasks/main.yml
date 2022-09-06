@@ -1,26 +1,17 @@
 ---
-- name: Create rstudio-server user
-  user:
-    name: rstudio-server
-    system: true
+- name: Set timeout
+  lineinfile:
+    path: /etc/rstudio/rserver.conf
+    line: auth-timeout-minutes=240
+    state: present
+    create: true
 
-- name: Create folders for Rstudio server
-  file:
-    path: "{{ item.path }}"
-    state: directory
-    mode: "{{ item.mode }}"
-    recurse: true
-  with_items:
-    - path: /var/run/rstudio-server
-      mode: "0777"
-    - path: /var/lock/rstudio-server
-      mode: "0755"
-    - path: /var/log/rstudio-server
-      mode: "0755"
-    - path: /var/lib/rstudio-server
-      mode: "0755"
-    - path: /var/lib/rstudio-server
-      mode: "0755"
+- name: Allow access to /srv/shiny-server/ folder
+  lineinfile:
+    path: /etc/rstudio/rsession.conf
+    line: directory-view-allow-list=/srv/shiny-server
+    state: present
+    create: true
 
 - name: Install pandoc system library
   apt:
@@ -51,20 +42,24 @@
     blockinfile:
       path: /etc/nginx/sites-enabled/default_site
       block: |2
-                location /rstudio/ {
-                    rewrite ^/rstudio/(.*)$ /$1 break;
+                location /rstudio {
+                   # Needed only for prefix of /rstudio
+                   rewrite ^/rstudio/(.*)$ /$1 break;
 
-                    proxy_pass http://localhost:8787;
+                   # Use http here when ssl-enabled=0 is set in rserver.conf
+                   proxy_pass http://localhost:8787;
+                   proxy_http_version 1.1;
 
-                    proxy_http_version 1.1;
-                    proxy_set_header Upgrade $http_upgrade;
-                    proxy_set_header Connection $connection_upgrade;
-                    proxy_read_timeout 20d;
-                    proxy_buffering off;
+                   proxy_set_header Upgrade $http_upgrade;
+                   proxy_set_header Connection $connection_upgrade;
 
-                    proxy_set_header X-RStudio-Root-Path /rstudio;
+                   # Optionally, use an explicit hostname and omit the port if using 80/443
+                   proxy_set_header Host $host:$server_port;
 
-                    proxy_set_header Host $host:$server_port;
+                   # Not needed if there's no prefix or www-root-path is set in rserver.conf
+                   proxy_set_header X-RStudio-Root-Path /rstudio;
+
+                   proxy_read_timeout 20d;
                 }
       marker: "# <!-- {mark} ANSIBLE MANAGED BLOCK #3 -->"
       insertbefore: "location / {"
@@ -76,4 +71,13 @@
       regexp: '^After=network'
       line: 'After=network-online.target nss-lookup.target'
       state: present
+    notify: restart_nginx
+    when: ansible_distribution == 'Debian'
+
+  - name: Restart daemon
+    systemd:
+      daemon_reload: true
+    changed_when: false
+    when: ansible_distribution == 'Debian'
+
   when: nginx_file_check.stat.exists

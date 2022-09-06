@@ -61,6 +61,18 @@
     - path: /usr/local/shiny-server/ext/pandoc/pandoc-citeproc
       src: /usr/bin/pandoc-citeproc
 
+- name: Create symlinks for the Shiny sample apps
+  file:
+    path: "{{ item.path }}"
+    src: "{{ item.src }}"
+    state: link
+    force: true
+  with_items:
+    - path: /srv/shiny-server/sample-apps
+      src: /usr/local/shiny-server/samples/sample-apps
+    - path: /srv/shiny-server/index.htm
+      src: /usr/local/shiny-server/samples/welcome.html
+
 - name: Check if default_site file exists
   stat:
     path: /etc/nginx/sites-enabled/default_site

@@ -17,23 +17,28 @@ swap_file_path: /var/swap.1
 swap_file_size: 3GB
 swappiness: '10'
 
-# Disable WiFi interface?
-disable_wifi: false
+# Install Nginx?
+install_nginx: true
+
+# Install PostgreSQL?
+install_postgresql: true
 
 # Security Configurations ######################################################
 
 # Ports to open
 exposed_ports:
-  - { rule: 'allow', port: 22, proto: 'tcp' }   # ssh
-  - { rule: 'allow', port: 22, proto: 'udp' }
-  - { rule: 'allow', port: 80, proto: 'tcp' }   # http
-  - { rule: 'allow', port: 5432, proto: 'tcp' }   # Postgresql
-  - { rule: 'allow', port: 5432, proto: 'udp' }
+  - { rule: 'allow', port: 22, proto: 'tcp' }     # ssh
+  - { rule: 'allow', port: 22, proto: 'udp' }     # ssh
+  - { rule: 'allow', port: 80, proto: 'tcp' }     # http
+  - { rule: 'allow', port: 5432, proto: 'tcp' }   # Postgresql (ommit if Postgresql is not installed)
+  - { rule: 'allow', port: 5432, proto: 'udp' }   # Postgresql (ommit if Postgresql is not installed)
+  # - { rule: 'allow', port: 8787, proto: 'tcp' } # RStudio Server (uncomment if Nginx is not installed)
+  # - { rule: 'allow', port: 3838, proto: 'tcp' } # Shiny Server (uncomment if Nginx is not installed)
 
-# Password for the main PostgreSQL user
+# Password for the main PostgreSQL user (ignore if PostgreSQL is not installed)
 postgres_password: 'very_secure_password'
 
-# Access rules for Postgresql
+# Access rules for Postgresql (ignore if PostgreSQL is not installed)
 postgresql_rules:
   - { contype: local, users: all, address: samehost, method: trust }
   - { contype: local, users: postgres, address: samehost, method: trust }
@@ -45,10 +50,11 @@ postgresql_rules:
 # Main Software Versions #######################################################
 
 # R version to install
-r_version: '4.2.1'
+use_r4pi: true # If set to false R will be compiled from source, if set to true the latest R version will be installed, this is only compatible with Raspberry Pi OS.
+r_version: '' # (e.g. '4.2.1') Currently, you can only choose the R version if it's going to be compiled.
 
 # Shiny-server version to install
 shiny_server_version: 'v1.5.19.995'
 
 # RStudio version to install
-rstudio_version: 'v2021.09.1+372'
+rstudio_version: '2022.11.0-daily+166'
