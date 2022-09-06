@@ -18,10 +18,6 @@
     name:
       - ufw
     state: present
-  notify: reboot_raspberry
-
-- name: Force reboot_raspberry handler
-  meta: flush_handlers
 
 - name: Configure open ports
   ufw:
