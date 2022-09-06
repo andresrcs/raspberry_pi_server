@@ -149,11 +149,12 @@
       enabled: true
       state: started
 
+  - name: Remove installation files
+    file:
+      path: shiny-server/
+      state: absent
+
   when: "shiny_server_version |\n
       regex_search('^v\\d\\.\\d+\\.\\d+', multiline=True) |\n
       trim | string not in version_shiny | string"
 
-- name: Remove installation files
-  file:
-    path: shiny-server/
-    state: absent
