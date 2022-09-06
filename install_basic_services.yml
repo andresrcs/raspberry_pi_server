@@ -7,6 +7,10 @@
     - vars/config_vars.yml
 
   pre_tasks:
+    - name: Load dynamic variable files
+      include_vars: "vars/architecture_vars_{{ ansible_architecture }}.yml"
+      tags: always
+
     - name: Update packages
       import_role:
         name: update_packages

@@ -88,13 +88,11 @@
     - name: Install the R4Pi .deb installer
       apt:
         deb: https://pkgs.r4pi.org/dl/r4pi-repo-conf_0.0.1-1_all.deb
-
-    - name: Update apt repo and cache
-      apt:
-        update_cache: true
+        allow_downgrade: true
 
     - name: Upgrade packages
       apt:
+        update_cache: true
         upgrade: dist
 
     - name: Install R4Pi

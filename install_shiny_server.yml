@@ -9,6 +9,7 @@
   pre_tasks:
     - name: Load dynamic variable files
       include_vars: "vars/architecture_vars_{{ ansible_architecture }}.yml"
+      tags: always
 
   tasks:
     - name: Make sure system dependencies are installed
