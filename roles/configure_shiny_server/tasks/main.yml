@@ -70,7 +70,7 @@
   with_items:
     - path: /srv/shiny-server/sample-apps
       src: /usr/local/shiny-server/samples/sample-apps
-    - path: /srv/shiny-server/index.htm
+    - path: /srv/shiny-server/index.html
       src: /usr/local/shiny-server/samples/welcome.html
 
 - name: Check if default_site file exists
@@ -84,9 +84,9 @@
       path: /etc/nginx/sites-enabled/default_site
       block: |
         map $http_upgrade $connection_upgrade {
-        default upgrade;
-        ''      close;
-            }
+            default upgrade;
+            ''      close;
+        }
       marker: "# <!-- {mark} ANSIBLE MANAGED BLOCK #1 -->"
       insertbefore: BOF
     notify: restart_nginx
