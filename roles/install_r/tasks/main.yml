@@ -93,6 +93,10 @@
       apt:
         update_cache: true
 
+    - name: Upgrade packages
+      apt:
+        upgrade: dist
+
     - name: Install R4Pi
       apt:
         name:
