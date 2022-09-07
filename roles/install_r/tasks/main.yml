@@ -85,20 +85,21 @@
     - use_r4pi == false
 
 - block:
-    - name: Install the R4Pi .deb installer
-      apt:
-        deb: https://pkgs.r4pi.org/dl/r4pi-repo-conf_0.0.1-1_all.deb
-        allow_downgrade: true
+    - name: Add R4Pi repo key
+      get_url:
+        url: https://pkgs.r4pi.org/dl/r4pi.asc
+        dest: /etc/apt/trusted.gpg.d/r4pi.asc
 
-    - name: Upgrade packages
-      apt:
-        update_cache: true
-        upgrade: dist
+    - name: Add R4Pi apt source
+      apt_repository:
+        repo: "deb http://debs.r4pi.org/ bullseye main"
+        state: present
 
     - name: Install R4Pi
       apt:
         name:
           - r4pi
+        update_cache: true
         state: present
 
     - name: Create the site-library folder
@@ -145,7 +146,5 @@
       when: linux_arch == '64'
 
   when:
-    - version_r.stdout|length == 0
     - use_r4pi
     - ansible_distribution == 'Debian'
-
