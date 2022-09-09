@@ -30,26 +30,22 @@
            'jsonlite', 'digest', 'htmltools',
            'xtable', 'R6', 'Cairo', 'sourcetools', 'shiny', 'rmarkdown')"
 
-    - name: Set R package repository to CRAN only
+    - name: Set R package repository and site-library folder
       set_fact:
-        cran_repo: "'https://cran.rstudio.com/'"
-        package_library: "'/usr/local/lib/R/site-library'"
-
-    - name: Set R package repository to R4Pi and CRAN
-      set_fact:
-        cran_repo: "c('https://pkgs.r4pi.org', 'http://cran.rstudio.com/')"
-        package_library: "'/opt/R/release/lib/R/site-library/'"
-      when:
-        - use_r4pi
-        - linux_arch == '32'
-
-    - name: Set R package repository to 64-bit R4Pi and CRAN
-      set_fact:
-        cran_repo: "c('https://pkgs.r4pi.org/aarch64', 'http://cran.rstudio.com/')"
-        package_library: "'/opt/R/release/lib/R/site-library/'"
-      when:
-        - use_r4pi
-        - linux_arch == '64'
+        cran_repo: >-
+          {%- if use_r4pi and linux_arch == '64' -%}
+            c('https://pkgs.r4pi.org/aarch64', 'https://cran.rstudio.com/')
+          {%- elif use_r4pi and linux_arch == '32' -%}
+            c('https://pkgs.r4pi.org', 'https://cran.rstudio.com/')
+          {%- else -%}
+            'https://cran.rstudio.com/'
+          {%- endif -%}
+        package_library: >-
+          {%- if use_r4pi -%}
+          '/opt/R/release/lib/R/site-library/'
+          {%- else -%}
+          '/usr/local/lib/R/site-library'
+          {%- endif -%}
 
     - name: Install R package dependencies
       become_flags: 'su - -c'

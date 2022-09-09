@@ -119,7 +119,7 @@
         - options(Ncpus = 4)
         - options(bitmapType = 'cairo')
 
-    - name: Set the package repositories to the 32-bit R4Pi repo + CRAN
+    - name: Set the package repositories to R4Pi + CRAN
       lineinfile:
         path: /opt/R/release/lib/R/etc/Rprofile.site
         regexp: "{{ item.regexp }}"
@@ -127,23 +127,14 @@
         insertbefore: 'r\["CRAN"\]'
       with_items:
         - regexp: 'r\["CRAN"\]'
-          line: '    r["CRAN"] <- "https://cran.rstudio.com/"'
+          line: '       r["CRAN"] <- "https://cran.rstudio.com/"'
         - regexp: 'r\["R4Pi"\]'
-          line: '    r["R4Pi"] <- "https://pkgs.r4pi.org/"'
-      when: linux_arch == '32'
-
-    - name: Set the package repositories to the 64-bit R4Pi repo + CRAN
-      lineinfile:
-        path: /opt/R/release/lib/R/etc/Rprofile.site
-        regexp: "{{ item.regexp }}"
-        line: "{{ item.line }}"
-        insertbefore: 'r\["CRAN"\]'
-      with_items:
-        - regexp: 'r\["CRAN"\]'
-          line: '    r["CRAN"] <- "https://cran.rstudio.com/"'
-        - regexp: 'r\["R4Pi"\]'
-          line: '    r["R4Pi"] <- "https://pkgs.r4pi.org/aarch64"'
-      when: linux_arch == '64'
+          line: >-
+            {%- if linux_arch == '64' -%}
+              {{ 'r["R4Pi"] <- "https://pkgs.r4pi.org/aarch64"' | indent(width=7, first=True) }}
+            {%- elif linux_arch == '32' -%}
+              {{ 'r["R4Pi"] <- "https://pkgs.r4pi.org/"' | indent(width=7, first=True) }}
+            {%- endif -%}
 
   when:
     - use_r4pi
