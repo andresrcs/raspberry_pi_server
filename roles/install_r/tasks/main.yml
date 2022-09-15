@@ -23,7 +23,9 @@
           - libssh-dev
           - libblas-dev
           - libopenblas-base
+          - libopenblas-dev
           - liblapack-dev
+          - liblapack3
           - libcurl4-openssl-dev
           - zlib1g-dev
           - texinfo
