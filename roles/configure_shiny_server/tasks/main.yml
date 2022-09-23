@@ -27,12 +27,12 @@
   with_items:
     - path: /var/log/shiny-server
       owner: shiny
-      group: root
-      mode: "0655"
+      group: shiny-apps
+      mode: "0755"
     - path: /srv/shiny-server
       owner: "{{ ansible_user }}"
       group: shiny-apps
-      mode: "0777"
+      mode: "0775"
     - path: /var/lib/shiny-server
       owner: root
       group: root

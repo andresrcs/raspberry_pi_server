@@ -111,29 +111,45 @@
       path: /etc/shiny-server/
       state: directory
 
-  - name: Install default config files
+  - name: Get current locale configuration
+    command: localectl status
+    register: locale_status
+    changed_when: false
+
+  - name: Parse 'LANG' from current locale and language configuration
+    set_fact:
+      locale_lang: "{{ locale_status.stdout | regex_search('LANG=([^\n]+)', '\\1') | first }}"
+
+  - name: Create systemd service file
+    template:
+      src: shiny-server-service.j2
+      dest: /lib/systemd/system/shiny-server.service
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Create symlink for shiny-server.service
+    file:
+      path: /etc/systemd/system/shiny-server.service
+      src: /lib/systemd/system/shiny-server.service
+      state: link
+      owner: root
+
+  - name: Create log rotate config for shiny-server
     copy:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-      remote_src: "{{ item.remote_src }}"
+      src: shiny-server
+      dest: /etc/logrotate.d/shiny-server
       owner: root
       mode: "0644"
-    with_items:
-      - src: shiny-server/config/default.config
-        dest: /etc/shiny-server/shiny-server.conf
-        remote_src: true
-      - src: shiny-server/config/init.d/debian/shiny-server
-        dest: /etc/init.d/shiny-server
-        remote_src: true
-      - src: shiny-server.service
-        dest: /lib/systemd/system/shiny-server.service
-        remote_src: false
+      force: false
 
-  - name: Modify shiny-server init.d file to make sure it can find compiled R
-    lineinfile:
-      path: /etc/init.d/shiny-server
-      regexp: "^PATH=/"
-      line: "PATH=/usr/local/bin/:/sbin:/usr/sbin:/bin:/usr/bin"
+  - name: Install default config file
+    copy:
+      src: shiny-server/config/default.config
+      dest: /etc/shiny-server/shiny-server.conf
+      remote_src: true
+      owner: root
+      mode: "0644"
 
   - name: Create symlink for shiny-server
     file:
@@ -157,4 +173,3 @@
   when: "shiny_server_version |\n
       regex_search('^v\\d\\.\\d+\\.\\d+', multiline=True) |\n
       trim | string not in version_shiny | string"
-
