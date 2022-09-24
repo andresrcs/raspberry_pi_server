@@ -123,17 +123,10 @@
   - name: Create systemd service file
     template:
       src: shiny-server-service.j2
-      dest: /lib/systemd/system/shiny-server.service
+      dest: /etc/systemd/system/shiny-server.service
       owner: root
       group: root
       mode: '0644'
-
-  - name: Create symlink for shiny-server.service
-    file:
-      path: /etc/systemd/system/shiny-server.service
-      src: /lib/systemd/system/shiny-server.service
-      state: link
-      owner: root
 
   - name: Create log rotate config for shiny-server
     copy:
