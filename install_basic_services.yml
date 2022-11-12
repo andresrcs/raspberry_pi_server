@@ -58,4 +58,6 @@
     - name: Configure R
       import_role:
         name: configure_r
-      tags: configure_r
+      tags:
+        - r
+        - configure_r
