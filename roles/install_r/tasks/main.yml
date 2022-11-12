@@ -61,23 +61,6 @@
         chdir: "/usr/local/src/R-{{ r_version }}"
         target: install
 
-    - name: Create the site-library folder
-      file:
-        path: /usr/local/lib/R/site-library/
-        state: directory
-        mode: "0777"
-        recurse: true
-
-    - name: Enable parallel installation of R packages and enable cairo
-      lineinfile:
-        path: /usr/local/lib/R/etc/Rprofile.site
-        line: "{{ item }}"
-        create: true
-        insertafter: EOF
-      with_items:
-        - options(Ncpus = 4)
-        - options(bitmapType='cairo')
-
     - name: Remove installation files
       file:
         path: "/usr/local/src/R-{{ r_version }}"
@@ -103,41 +86,6 @@
           - r4pi
         update_cache: true
         state: present
-
-    - name: Create the site-library folder
-      file:
-        path: /opt/R/release/lib/R/site-library/
-        state: directory
-        mode: "0777"
-        recurse: true
-
-    - name: Enable parallel installation of R packages and cairo rendering
-      lineinfile:
-        path: /opt/R/release/lib/R/etc/Rprofile.site
-        line: "{{ item }}"
-        create: true
-        insertafter: EOF
-      with_items:
-        - options(Ncpus = 4)
-        - options(bitmapType = 'cairo')
-
-    - name: Set the package repositories to R4Pi + CRAN
-      lineinfile:
-        path: /opt/R/release/lib/R/etc/Rprofile.site
-        regexp: "{{ item.regexp }}"
-        line: "{{ item.line }}"
-        insertbefore: 'r\["CRAN"\]'
-      with_items:
-        - regexp: 'r\["CRAN"\]'
-          line: '       r["CRAN"] <- "https://cran.rstudio.com/"'
-        - regexp: 'r\["R4Pi"\]'
-          line: >-
-            {%- if linux_arch == '64' -%}
-              {{ 'r["R4Pi"] <- "https://pkgs.r4pi.org/aarch64"' | indent(width=7, first=True) }}
-            {%- elif linux_arch == '32' -%}
-              {{ 'r["R4Pi"] <- "https://pkgs.r4pi.org/"' | indent(width=7, first=True) }}
-            {%- endif -%}
-
   when:
     - use_r4pi
     - ansible_distribution == 'Debian'

@@ -54,3 +54,8 @@
       import_role:
         name: install_r
       tags: r
+
+    - name: Configure R
+      import_role:
+        name: configure_r
+      tags: configure_r
