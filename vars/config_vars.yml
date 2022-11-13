@@ -57,4 +57,4 @@ r_version: '' # (e.g. '4.2.1') Currently, you can only choose the R version if i
 shiny_server_version: 'v1.5.19.995'
 
 # RStudio version to install
-rstudio_version: '2022.11.0-daily+166'
+rstudio_version: '2022.12.0-preview+322'
