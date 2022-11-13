@@ -42,7 +42,7 @@
     blockinfile:
       path: /etc/nginx/sites-enabled/default_site
       block: |2
-                location /rstudio {
+                location /rstudio/ {
                    # Needed only for prefix of /rstudio
                    rewrite ^/rstudio/(.*)$ /$1 break;
 
