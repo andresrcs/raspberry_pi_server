@@ -3,9 +3,9 @@
   file:
     path: >-
       {%- if use_r4pi -%}
-        '/opt/R/release/lib/R/site-library/'
+        /opt/R/release/lib/R/site-library/
       {%- else -%}
-        '/usr/local/lib/R/site-library'
+        /usr/local/lib/R/site-library
       {%- endif -%}
     state: directory
     mode: "0777"
@@ -15,9 +15,9 @@
   lineinfile:
     path: >-
       {%- if use_r4pi -%}
-        '/opt/R/release/lib/R/etc/Rprofile.site'
+        /opt/R/release/lib/R/etc/Rprofile.site
       {%- else -%}
-        '/usr/local/lib/R/etc/Rprofile.site'
+        /usr/local/lib/R/etc/Rprofile.site
       {%- endif -%}
     line: "{{ item }}"
     create: true
