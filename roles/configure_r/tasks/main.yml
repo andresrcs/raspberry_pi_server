@@ -25,6 +25,7 @@
   with_items:
     - options(Ncpus = 4)
     - options(bitmapType='cairo')
+    - options(HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version["platform"], R.version["arch"], R.version["os"], "ansible_managed")))
 
 - name: Set the package repositories to R4Pi + CRAN
   lineinfile:
