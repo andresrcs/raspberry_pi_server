@@ -51,10 +51,10 @@ postgresql_rules:
 
 # R version to install
 use_r4pi: true # If set to false R will be compiled from source, if set to true the latest R version will be installed, this is only compatible with Raspberry Pi OS.
-r_version: '' # (e.g. '4.2.1') Currently, you can only choose the R version if it's going to be compiled.
+r_version: '' # (e.g. '4.2.2') Currently, you can only choose the R version if it's going to be compiled.
 
 # Shiny-server version to install
-shiny_server_version: 'v1.5.19.995'
+shiny_server_version: 'v1.5.20.1002'
 
 # RStudio version to install
-rstudio_version: '2022.12.0+353'
+rstudio_version: '2022.12.1+361'
