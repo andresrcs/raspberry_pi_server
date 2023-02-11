@@ -19,6 +19,7 @@
           - xvfb
           - libbz2-dev
           - libzstd-dev
+          - libbrotli-dev
           - liblzma-dev
           - libssh-dev
           - libblas-dev
@@ -27,11 +28,15 @@
           - liblapack-dev
           - liblapack3
           - libcurl4-openssl-dev
+          - libssl-dev
+          - libabsl-dev
+          - libjemalloc-dev
           - zlib1g-dev
           - texinfo
           - texlive
           - texlive-fonts-extra
           - screen
+          - gzip
           - wget
           - libpcre2-dev
           - openjdk-11-jdk
@@ -48,7 +53,7 @@
 
     - name: Configure R compilation
       command:
-        cmd: ./configure --enable-R-shlib --with-blas --with-lapack
+        cmd: ./configure --enable-R-shlib --enable-memory-profiling --with-blas --with-lapack
         chdir: "/usr/local/src/R-{{ r_version }}"
         creates: "/usr/local/src/R-{{ r_version }}/Makeconf"
 
@@ -68,6 +73,7 @@
   when:
     - "r_version|string not in version_r|string"
     - use_r4pi == false
+    - use_rig == false
 
 - block:
     - name: Add R4Pi repo key
@@ -83,9 +89,36 @@
     - name: Install R4Pi
       apt:
         name:
+          - libcurl4-openssl-dev
+          - libssl-dev
+          - libabsl-dev
+          - libjemalloc-dev
           - r4pi
         update_cache: true
         state: present
   when:
     - use_r4pi
+    - use_rig == false
     - ansible_distribution == 'Debian'
+
+- block:
+    - name: Install rig
+      unarchive:
+        src: https://github.com/r-lib/rig/releases/download/latest/rig-linux-arm64-latest.tar.gz
+        remote_src: true
+        dest: /usr/local/
+        creates: /usr/local/bin/rig
+
+    - name: Install R with rig
+      command:
+        cmd: "rig add {{r_version}} --without-cran-mirror"
+        creates: "/opt/R/{{r_version}}/bin/R"
+
+    - name: Set default R version
+      command:
+        cmd: "rig default {{r_version}}"
+      changed_when: false
+  when:
+    - "r_version|string not in version_r|string"
+    - use_rig
+    - use_r4pi == false

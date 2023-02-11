@@ -1,0 +1,5 @@
+# set a CRAN mirror
+local({r <- getOption("repos")
+       r["R4Pi"] <- "https://pkgs.r4pi.org/aarch64"
+       r["CRAN"] <- "https://cran.rstudio.com/"
+       options(repos=r)})

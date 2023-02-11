@@ -50,8 +50,14 @@ postgresql_rules:
 # Main Software Versions #######################################################
 
 # R version to install
-use_r4pi: true # If set to false R will be compiled from source, if set to true the latest R version will be installed, this is only compatible with Raspberry Pi OS.
-r_version: '' # (e.g. '4.2.2') Currently, you can only choose the R version if it's going to be compiled.
+use_r4pi: true # If set to true the latest R version will be installed, this is only compatible with
+                # Raspberry Pi OS.
+use_rig: false # Don't forget to specify an R version in the following line
+r_version: '' # (e.g. '4.2.2') Currently, you can only choose the R version if it's going to be
+                   # installed with rig or compiled (with both 'use_r4pi' and 'use_rig' set as false).
+
+# Quarto version to install
+quarto_version: '1.3.191'
 
 # Shiny-server version to install
 shiny_server_version: 'v1.5.20.1002'

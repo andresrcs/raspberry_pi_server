@@ -1,0 +1,46 @@
+---
+- name: Check Quarto version installed
+  command: "quarto --version"
+  register: version_quarto
+  changed_when: false
+  failed_when: false
+
+- block:
+  - name: Define R package dependencies
+    set_fact:
+      quarto_dependencies: "c('rmarkdown')"
+
+  - name: Set R package repository and site-library folder
+    set_fact:
+      cran_repo: >-
+        {%- if use_r4pi and linux_arch == '64' -%}
+          c('https://pkgs.r4pi.org/aarch64', 'https://cran.rstudio.com/')
+        {%- elif use_r4pi and linux_arch == '32' -%}
+          c('https://pkgs.r4pi.org', 'https://cran.rstudio.com/')
+        {%- elif use_rig and use_r4pi == false -%}
+          c('https://pkgs.r4pi.org/aarch64', 'https://cran.rstudio.com/')
+        {%- else -%}
+          'https://cran.rstudio.com/'
+        {%- endif -%}
+      package_library: >-
+        {%- if use_r4pi and use_rig == false -%}
+          '/opt/R/release/lib/R/site-library/'
+        {%- elif use_rig and use_r4pi == false -%}
+          '/opt/R/{{r_version}}/lib/R/site-library/'
+        {%- else -%}
+          '/usr/local/lib/R/site-library/'
+        {%- endif -%}
+
+  - name: Install R package dependencies
+    become_flags: 'su - -c'
+    shell:
+      cmd: "R -e \"install.packages({{ quarto_dependencies }} [!({{ quarto_dependencies }} %in% installed.packages())], repos={{ cran_repo }}, lib={{ package_library }})\""
+    register: r_install
+    changed_when: r_install.stderr != ""
+
+  - name: Install quarto from pre-release
+    ansible.builtin.apt:
+      deb: "https://github.com/quarto-dev/quarto-cli/releases/download/v{{ quarto_version }}/quarto-{{ quarto_version }}-linux-arm64.deb"
+  when:
+    - linux_arch == '64'
+    - "quarto_version|string not in version_quarto|string"
