@@ -13,7 +13,7 @@
     mode: "0777"
     recurse: true
 
-- name: Set the package repositories to R4Pi + CRAN
+- name: Copy custom Rprofile.site file (R4Pi repo, parallel installation and Cairo enabled)
   copy:
     src: "Rprofile_{{linux_arch}}"
     dest: >-
@@ -21,26 +21,9 @@
         /opt/R/release/lib/R/etc/Rprofile.site
       {%- elif use_rig and use_r4pi == false -%}
         /opt/R/{{r_version}}/lib/R/etc/Rprofile.site
+      {%- else -%}
+        /usr/local/lib/R/etc/Rprofile.site
       {%- endif -%}
     owner: root
     mode: "0644"
     force: true
-  when: use_r4pi or use_rig
-
-- name: Enable parallel installation of R packages and enable cairo
-  lineinfile:
-    path: >-
-      {%- if use_r4pi and use_rig == false -%}
-        /opt/R/release/lib/R/etc/Rprofile.site
-      {%- elif use_rig and use_r4pi == false -%}
-        /opt/R/{{r_version}}/lib/R/etc/Rprofile.site
-      {%- else -%}
-        /usr/local/lib/R/etc/Rprofile.site
-      {%- endif -%}
-    line: "{{ item }}"
-    create: true
-    insertafter: EOF
-  with_items:
-    - options(Ncpus = 4)
-    - options(bitmapType='cairo')
-    - options(HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version["platform"], R.version["arch"], R.version["os"], "ansible_managed")))
