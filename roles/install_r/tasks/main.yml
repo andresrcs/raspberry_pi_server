@@ -8,38 +8,7 @@
 - block:
     - name: Install system dependencies
       apt:
-        name:
-          - gfortran
-          - libreadline-dev
-          - libx11-dev
-          - libxt-dev
-          - libpng-dev
-          - libjpeg-dev
-          - libcairo2-dev
-          - xvfb
-          - libbz2-dev
-          - libzstd-dev
-          - libbrotli-dev
-          - liblzma-dev
-          - libssh-dev
-          - libblas-dev
-          - libopenblas-base
-          - libopenblas-dev
-          - liblapack-dev
-          - liblapack3
-          - libcurl4-openssl-dev
-          - libssl-dev
-          - libabsl-dev
-          - libjemalloc-dev
-          - zlib1g-dev
-          - texinfo
-          - texlive
-          - texlive-fonts-extra
-          - screen
-          - gzip
-          - wget
-          - libpcre2-dev
-          - openjdk-11-jdk
+        name: "{{ lookup('file', 'package_list_compile_r.txt').splitlines() }}"
         state: present
 
     - name: Download R source
