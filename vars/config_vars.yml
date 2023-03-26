@@ -57,10 +57,10 @@ r_version: '' # (e.g. '4.2.2') Currently, you can only choose the R version if i
                    # installed with rig or compiled (with both 'use_r4pi' and 'use_rig' set as false).
 
 # Quarto version to install
-quarto_version: '1.3.230'
+quarto_version: '1.3.290'
 
 # Shiny-server version to install
 shiny_server_version: 'v1.5.20.1002'
 
 # RStudio version to install
-rstudio_version: '2022.12.1+365'
+rstudio_version: '2023.03.0+407'
