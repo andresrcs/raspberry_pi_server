@@ -38,7 +38,7 @@
     register: r_install
     changed_when: r_install.stderr != ""
 
-  - name: Install quarto from pre-release
+  - name: Install quarto from github
     ansible.builtin.apt:
       deb: "https://github.com/quarto-dev/quarto-cli/releases/download/v{{ quarto_version }}/quarto-{{ quarto_version }}-linux-arm64.deb"
   when:
