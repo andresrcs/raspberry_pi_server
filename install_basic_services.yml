@@ -61,8 +61,3 @@
       tags:
         - r
         - configure_r
-
-    - name: Install Quarto
-      import_role:
-        name: install_quarto
-      tags: quarto
