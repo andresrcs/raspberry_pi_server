@@ -40,24 +40,27 @@ postgres_password: 'very_secure_password'
 
 # Access rules for Postgresql (ignore if PostgreSQL is not installed)
 postgresql_rules:
-  - { contype: local, users: all, address: samehost, method: trust }
   - { contype: local, users: postgres, address: samehost, method: trust }
-  - { contype: host, users: all, address: "{{ ansible_default_ipv4.network }}/24", method: trust }
-  - { contype: host, users: all, address: 0.0.0.0/0, method: password }
-  - { contype: host, users: all, address: 127.0.0.1/32, method: md5 }
-  - { contype: host, users: all, address: '::1/128', method: trust }
+  - { contype: local, users: all, address: samehost, method: trust }
+  - { contype: hostssl, users: all, address: 0.0.0.0/0, method: scram-sha-256 }
+  - { contype: host, users: all, address: 0.0.0.0/0, method: scram-sha-256 }
+  - { contype: hostssl, users: all, address: '::0/0', method: scram-sha-256 }
+  - { contype: host, users: all, address: '::0/0', method: scram-sha-256 }
+  - { contype: host, users: all, address: 127.0.0.1/32, method: scram-sha-256 }
+  - { contype: host, users: all, address: '::1/128', method: scram-sha-256 }
 
 # Main Software Versions #######################################################
 
 # R version to install
-use_r4pi: true # If set to true the latest R version will be installed, this is only compatible with
+use_r4pi: false # Currently unavailable for the newer RPiOS Version (Debian 12 based)
+                # If set to true the latest R version will be installed, this is only compatible with
                 # Raspberry Pi OS.
-use_rig: false # Don't forget to specify an R version in the following line
-r_version: '' # (e.g. '4.3.0') Currently, you can only choose the R version if it's going to be
+use_rig: true # Don't forget to specify an R version in the following line
+r_version: '4.3.1' # (e.g. '4.3.1') Currently, you can only choose the R version if it's going to be
                    # installed with rig or compiled (with both 'use_r4pi' and 'use_rig' set as false).
 
 # Shiny-server version to install
 shiny_server_version: 'v1.5.20.1002'
 
 # RStudio version to install
-rstudio_version: '2023.08.0-daily+33'
+rstudio_version: '2023.12.0-daily+232'

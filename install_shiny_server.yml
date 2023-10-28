@@ -21,7 +21,7 @@
           - git
           - cmake
           - pandoc
-          - pandoc-citeproc
+          - pandoc-citeproc-preamble
         state: present
 
     - name: Define R package dependencies

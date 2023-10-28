@@ -35,19 +35,26 @@
 
 - name: Configure PostgreSQL options
   postgresql_set:
-    name: listen_addresses
-    value: '*'
-  notify:
-    - restart_postgresql
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+  with_items:
+    - name: listen_addresses
+      value: "'*'"
+    - name: password_encryption
+      value: 'scram-sha-256'
+  notify: restart_postgresql
 
 - name: Force restart_postgresql handler
   meta: flush_handlers
 
-- name: Create the main user
+- name: Create the main users
   postgresql_user:
-    name: "{{ ansible_user }}"
+    name: "{{ item.name }}"
     password: "{{ postgres_password }}"
     state: present
+  with_items:
+    - name: "{{ ansible_user }}"
+    - name: postgres
 
 - name: Create the main database
   postgresql_db:

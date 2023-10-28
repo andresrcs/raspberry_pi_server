@@ -42,13 +42,6 @@
       group: root
       mode: "0655"
 
-- name: Install pandoc library
-  apt:
-    name:
-      - pandoc
-      - pandoc-citeproc
-    state: present
-
 - name: Create symlinks to the system version of pandoc
   file:
     path: "{{ item.path }}"
@@ -59,7 +52,7 @@
     - path: /usr/local/shiny-server/ext/pandoc/pandoc
       src: /usr/bin/pandoc
     - path: /usr/local/shiny-server/ext/pandoc/pandoc-citeproc
-      src: /usr/bin/pandoc-citeproc
+      src: /usr/bin/pandoc-citeproc-preamble
 
 - name: Create symlinks for the Shiny sample apps
   file:

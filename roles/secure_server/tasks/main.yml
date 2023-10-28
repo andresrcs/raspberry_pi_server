@@ -65,3 +65,19 @@
     - src: nginx-noscript.conf
       dest: /etc/fail2ban/filter.d/nginx-noscript.conf
   notify: restart_fail2ban
+
+- name: Configure log rotation for system logs
+  lineinfile:
+    path: '/etc/systemd/journald.conf'
+    search_string: "{{ item.string }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+    - string: '#RuntimeMaxFileSize='
+      line: 'RuntimeMaxFileSize=100M'
+    - string: '#RuntimeMaxFiles=100'
+      line: 'RuntimeMaxFiles=10'
+    - string: '#SystemMaxFileSize='
+      line: 'SystemMaxFileSize=100M'
+    - string: '#SystemMaxFiles=100'
+      line: 'SystemMaxFiles=10'
