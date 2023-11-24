@@ -34,11 +34,11 @@
       set_fact:
         cran_repo: >-
           {%- if use_r4pi and linux_arch == '64' -%}
-            c('https://pkgs.r4pi.org/aarch64', 'https://cran.rstudio.com/')
+            c('https://pkgs.r4pi.org/bookworm/', 'https://cran.rstudio.com/')
           {%- elif use_r4pi and linux_arch == '32' -%}
             c('https://pkgs.r4pi.org', 'https://cran.rstudio.com/')
           {%- elif use_rig and use_r4pi == false -%}
-            c('https://pkgs.r4pi.org/aarch64', 'https://cran.rstudio.com/')
+            c('https://pkgs.r4pi.org/bookworm/', 'https://cran.rstudio.com/')
           {%- else -%}
             'https://cran.rstudio.com/'
           {%- endif -%}

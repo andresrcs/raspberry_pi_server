@@ -52,7 +52,7 @@
 
     - name: Add R4Pi apt source
       apt_repository:
-        repo: "deb http://debs.r4pi.org/ bullseye main"
+        repo: "deb [ arch=arm64 ] http://debs.r4pi.org/bookworm/ bookworm main"
         state: present
 
     - name: Install R4Pi
