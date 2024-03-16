@@ -81,11 +81,11 @@
     - name: Install R with rig
       command:
         cmd: "rig add {{r_version}} --without-cran-mirror"
-        creates: "/opt/R/{{r_version}}/bin/R"
+        creates: "/opt/R/{{ r_version }}/bin/R"
 
     - name: Set default R version
       command:
-        cmd: "rig default {{r_version}}"
+        cmd: "rig default {{ r_version }}"
       changed_when: false
   when:
     - "r_version|string not in version_r|string"

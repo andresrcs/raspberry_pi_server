@@ -46,7 +46,7 @@
   - name: Get SHASUM256 for the specific ARM version
     set_fact:
       node_sha: "{{ SHASUMS256.stdout\n
-      | regex_search('^.+(?=\\snode\\-v.+\\-linux\\-' + node_arch + '\\.tar\\.xz)',\n
+      | regex_search('^.+(?=\\snode\\-v.+\\-linux\\-arm64\\.tar\\.xz)',\n
       multiline=True) | trim }}"
 
   - name: Modify installation script for Node.js to use the ARM version
@@ -58,7 +58,7 @@
       - regexp: "^NODE_SHA256"
         line: "NODE_SHA256={{ node_sha }}"
       - regexp: "^\\s{2}local NODE_FILENAME="
-        line: "  local NODE_FILENAME=\"node-${NODE_VERSION}-linux-{{ node_arch }}.tar.xz\""
+        line: "  local NODE_FILENAME=\"node-${NODE_VERSION}-linux-arm64.tar.xz\""
       - regexp: "^\\s{2}local NODE_URL="
         line: "  local NODE_URL=\"https://nodejs.org/dist/${NODE_VERSION}/${NODE_FILENAME}\""
 

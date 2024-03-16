@@ -6,26 +6,19 @@
   vars_files:
     - vars/config_vars.yml
 
-  pre_tasks:
-    - name: Load dynamic variable files
-      include_vars: "vars/architecture_vars_{{ ansible_architecture }}.yml"
-      tags: always
-
   tasks:
-    - block:
-        - name: Make sure system dependencies are installed
-          apt:
-            name:
-              - gdebi
-            state: present
+    - name: Make sure system dependencies are installed
+      apt:
+        name:
+          - gdebi
+        state: present
 
-        - name: Install RStudio server
-          import_role:
-            name: install_rstudio
-          tags: rstudio
+    - name: Install RStudio server
+      import_role:
+        name: install_rstudio
+      tags: rstudio
 
-        - name: Configure RStudio
-          import_role:
-            name: configure_rstudio
-          tags: configure_rstudio
-      when: linux_arch == '64'
+    - name: Configure RStudio
+      import_role:
+        name: configure_rstudio
+      tags: configure_rstudio

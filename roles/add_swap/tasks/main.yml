@@ -1,32 +1,28 @@
 ---
-- name: Set swap_file variable
-  set_fact:
-    swap_file: "{{ swap_file_path }}"
-
 - name: Check if swap file exists
   stat:
-    path: "{{ swap_file }}"
+    path: "{{ swap_file_path }}"
   register: swap_file_check
 
 - name: Create swap file
-  command: fallocate -l {{ swap_file_size }} {{ swap_file }}
+  command: fallocate -l {{ swap_file_size }} {{ swap_file_path }}
   when: not swap_file_check.stat.exists
 
 - name: Change swap file permissions
   file:
-    path: "{{ swap_file }}"
+    path: "{{ swap_file_path }}"
     owner: root
     group: root
     mode: '0600'
 
 - name: Format swap file
-  command: "mkswap {{swap_file}}"
+  command: "mkswap {{swap_file_path}}"
   when: not swap_file_check.stat.exists
 
 - name: Write swap entry in fstab
   mount:
     name: swap
-    src: "{{ swap_file }}"
+    src: "{{ swap_file_path }}"
     fstype: swap
     opts: sw
     passno: '0'

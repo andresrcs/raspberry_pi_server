@@ -6,16 +6,12 @@
   vars_files:
     - vars/config_vars.yml
 
-  pre_tasks:
-    - name: Load dynamic variable files
-      include_vars: "vars/architecture_vars_{{ ansible_architecture }}.yml"
-      tags: always
-
   tasks:
     - name: Make sure system dependencies are installed
       apt:
         name:
           - libcairo2-dev
+          - libjpeg62
           - libxt-dev
           - libharfbuzz-dev
           - git
@@ -33,10 +29,8 @@
     - name: Set R package repository and site-library folder
       set_fact:
         cran_repo: >-
-          {%- if use_r4pi and linux_arch == '64' -%}
+          {%- if use_r4pi -%}
             c('https://pkgs.r4pi.org/bookworm/', 'https://cran.rstudio.com/')
-          {%- elif use_r4pi and linux_arch == '32' -%}
-            c('https://pkgs.r4pi.org', 'https://cran.rstudio.com/')
           {%- elif use_rig and use_r4pi == false -%}
             c('https://pkgs.r4pi.org/bookworm/', 'https://cran.rstudio.com/')
           {%- else -%}

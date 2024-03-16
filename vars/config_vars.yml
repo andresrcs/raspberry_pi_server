@@ -52,17 +52,17 @@ postgresql_rules:
 # Main Software Versions #######################################################
 
 # R version to install
-use_r4pi: true      # Currently set to work only with the newer RPiOS Version (Debian 12 based)
-                    # If set to true the latest R version will be installed, this is only compatible with
-                    # Raspberry Pi OS.
+use_r4pi: false      # It currently only works with the newer RPi OS Version (Debian 12 based)
+                    # If set to true the latest R version available will be installed,
+                    # you can't choose a different R version
 
-use_rig: false      # Don't forget to specify an R version in the following line
+use_rig: true      # If set to true, don't forget to specify an R version in the following line
 
-r_version: ''       # (e.g. '4.3.1') Currently, you can only choose the R version if it's going to be
-                    # installed with rig or compiled (with both 'use_r4pi' and 'use_rig' set as false).
+r_version: '4.3.3'       # e.g. '4.3.3'. Currently, you can only choose the R version if it's going to be
+                    # installed with rig or compiled (with both 'use_r4pi' and 'use_rig' set to false).
 
 # Shiny-server version to install
-shiny_server_version: 'v1.5.20.1002'
+shiny_server_version: 'v1.5.21.1012'
 
 # RStudio version to install
-rstudio_version: '2023.12.0-daily+330'
+rstudio_version: '2024.04.0-daily+581'

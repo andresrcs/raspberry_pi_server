@@ -39,7 +39,7 @@
     value: "{{ item.value }}"
   with_items:
     - name: listen_addresses
-      value: "'*'"
+      value: '*'
     - name: password_encryption
       value: 'scram-sha-256'
   notify: restart_postgresql

@@ -1,29 +1,27 @@
 ---
+- name: Set R_HOME variable
+  set_fact:
+    R_HOME: >-
+      {%- if use_r4pi and use_rig == false -%}
+        /opt/R/release/lib/R
+      {%- elif use_rig and use_r4pi == false -%}
+        /opt/R/{{r_version}}/lib/R
+      {%- else -%}
+        /usr/local/lib/R
+      {%- endif -%}
+
 - name: Create the site-library folder
   file:
-    path: >-
-      {%- if use_r4pi and use_rig == false -%}
-        /opt/R/release/lib/R/site-library/
-      {%- elif use_rig and use_r4pi == false -%}
-        /opt/R/{{r_version}}/lib/R/site-library/
-      {%- else -%}
-        /usr/local/lib/R/site-library/
-      {%- endif -%}
+    path: "{{ R_HOME }}/site-library/"
     state: directory
     mode: "0777"
     recurse: true
 
-- name: Copy custom Rprofile.site file (R4Pi repo, parallel installation and Cairo enabled)
-  copy:
-    src: "Rprofile_{{linux_arch}}"
-    dest: >-
-      {%- if use_r4pi and use_rig == false -%}
-        /opt/R/release/lib/R/etc/Rprofile.site
-      {%- elif use_rig and use_r4pi == false -%}
-        /opt/R/{{r_version}}/lib/R/etc/Rprofile.site
-      {%- else -%}
-        /usr/local/lib/R/etc/Rprofile.site
-      {%- endif -%}
+- name: Create custom Rprofile.site file (R4Pi repo, parallel installation and Cairo enabled)
+  template:
+    src: Rprofile.j2
+    dest: "{{ R_HOME }}/etc/Rprofile.site"
     owner: root
-    mode: "0644"
+    group: root
+    mode: '0644'
     force: true
