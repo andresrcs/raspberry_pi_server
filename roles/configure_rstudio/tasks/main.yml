@@ -17,7 +17,6 @@
   apt:
     name:
       - pandoc
-      - pandoc-citeproc-preamble
     state: present
 
 - name: Check if default_site file exists

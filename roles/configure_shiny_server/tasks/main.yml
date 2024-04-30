@@ -51,8 +51,6 @@
   with_items:
     - path: /usr/local/shiny-server/ext/pandoc/pandoc
       src: /usr/bin/pandoc
-    - path: /usr/local/shiny-server/ext/pandoc/pandoc-citeproc
-      src: /usr/bin/pandoc-citeproc-preamble
 
 - name: Create symlinks for the Shiny sample apps
   file:
