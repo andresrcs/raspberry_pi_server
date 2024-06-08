@@ -65,4 +65,4 @@ r_version: ''       # e.g. '4.3.3'. Currently, you can only choose the R version
 shiny_server_version: 'v1.5.22.1017'
 
 # RStudio version to install
-rstudio_version: '2024.07.0-daily+75'
+rstudio_version: '2024.07.0-daily+212'
