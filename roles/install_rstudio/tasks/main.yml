@@ -8,12 +8,13 @@
 - block:
   - name: Download rstudio-server daily build
     get_url:
-      url: >-
-          {%- if ansible_distribution == 'Ubuntu' -%}
-            https://s3.amazonaws.com/rstudio-ide-build/server/{{ ansible_distribution_release }}/arm64/rstudio-server-{{ rstudio_version.replace('+', '-') }}-arm64.deb
-          {%- elif ansible_distribution == 'Debian' -%}
-            https://s3.amazonaws.com/rstudio-ide-build/server/jammy/arm64/rstudio-server-{{ rstudio_version.replace('+', '-') }}-arm64.deb
-          {%- endif -%}
+      url: "https://s3.amazonaws.com/rstudio-ide-build/server/jammy/arm64/rstudio-server-{{ rstudio_version.replace('+', '-') }}-arm64.deb"
+      # >-
+      #    {%- if ansible_distribution == 'Ubuntu' -%}
+      #      https://s3.amazonaws.com/rstudio-ide-build/server/{{ ansible_distribution_release }}/arm64/rstudio-server-{{ rstudio_version.replace('+', '-') }}-arm64.deb
+      #    {%- elif ansible_distribution == 'Debian' -%}
+      #      https://s3.amazonaws.com/rstudio-ide-build/server/jammy/arm64/rstudio-server-{{ rstudio_version.replace('+', '-') }}-arm64.deb
+      #    {%- endif -%}
       dest: ~/rstudio-server-{{ rstudio_version }}-arm64.deb
 
   - name: Install rstudio-server

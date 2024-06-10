@@ -68,7 +68,6 @@
   when:
     - use_r4pi
     - use_rig == false
-    - ansible_distribution == 'Debian'
 
 - block:
     - name: Install rig
