@@ -52,7 +52,7 @@
 
     - name: Add R4Pi apt source
       apt_repository:
-        repo: "deb [ arch=arm64 ] http://debs.r4pi.org/noble/ noble main"
+        repo: "deb [ arch=arm64 ] http://debs.r4pi.org/{{ ansible_distribution_release }}/ {{ ansible_distribution_release }} main"
         state: present
 
     - name: Install R4Pi
