@@ -27,14 +27,7 @@
 
     - name: Set R package repository and site-library folder
       set_fact:
-        cran_repo: >-
-          {%- if use_r4pi -%}
-            c('https://pkgs.r4pi.org/bookworm/', 'https://cran.rstudio.com/')
-          {%- elif use_rig and use_r4pi == false -%}
-            c('https://pkgs.r4pi.org/bookworm/', 'https://cran.rstudio.com/')
-          {%- else -%}
-            'https://cran.rstudio.com/'
-          {%- endif -%}
+        cran_repo: "c('R4Pi' = 'https://pkgs.r4pi.org/{{ ansible_distribution_release }}', 'CRAN' = 'https://cran.rstudio.com/')"
         package_library: >-
           {%- if use_r4pi and use_rig == false -%}
             '/opt/R/release/lib/R/site-library/'
