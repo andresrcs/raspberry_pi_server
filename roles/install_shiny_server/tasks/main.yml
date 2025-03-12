@@ -24,44 +24,6 @@
       - "shiny-server/tmp"
       - "shiny-server/build"
 
-  - name: Get Node.js version to install
-    command:
-      cmd: cat .nvmrc
-      chdir: "shiny-server"
-    register: node_version
-    changed_when: false
-
-  - name: Donwload SHASUMS256.txt file for Node.js
-    get_url:
-      url: "https://nodejs.org/dist/{{ node_version.stdout }}/SHASUMS256.txt"
-      dest: "shiny-server/SHASUMS256.txt"
-
-  - name: Read SHASUMS256.txt file
-    command:
-      cmd: cat SHASUMS256.txt
-      chdir: "shiny-server"
-    register: SHASUMS256
-    changed_when: false
-
-  - name: Get SHASUM256 for the specific ARM version
-    set_fact:
-      node_sha: "{{ SHASUMS256.stdout\n
-      | regex_search('^.+(?=\\snode\\-v.+\\-linux\\-arm64\\.tar\\.xz)',\n
-      multiline=True) | trim }}"
-
-  - name: Modify installation script for Node.js to use the ARM version
-    lineinfile:
-      path: "shiny-server/external/node/install-node.sh"
-      regexp: "{{ item.regexp }}"
-      line: "{{ item.line }}"
-    with_items:
-      - regexp: "^NODE_SHA256"
-        line: "NODE_SHA256={{ node_sha }}"
-      - regexp: "^\\s{2}local NODE_FILENAME="
-        line: "  local NODE_FILENAME=\"node-${NODE_VERSION}-linux-arm64.tar.xz\""
-      - regexp: "^\\s{2}local NODE_URL="
-        line: "  local NODE_URL=\"https://nodejs.org/dist/${NODE_VERSION}/${NODE_FILENAME}\""
-
   - name: Execute install_node.sh script
     shell:
       cmd: ./external/node/install-node.sh
@@ -81,20 +43,13 @@
     make:
       chdir: "shiny-server/tmp"
 
-  - name: Modify SHASUMS for the 'optimist' npm module
-    replace:
-      path: "shiny-server/npm-shrinkwrap.json"
-      regexp: '"integrity": "sha512-3RAVyfbptsR6HOFA0BFNLyw8ZXXDRWf5P3tIslbNt12kTikaRWepRR9vLHMyibIZeNfScI9uGqcn1KfbIAeuXA==",'
-      replace: '"integrity": "sha512-ZwrJM2WaOJesJGZlejLqAiBAE6Ts2PZNk1pQ/x1uTMsQw83BaXWShjqCbhh5bPQUNrlx2Ijz1dOr0hLmlkxKag==",'
-
   - name: Install and rebuild npm dependencies
     shell:
       cmd: |
         DIR=`pwd`
         PATH=$DIR/../bin:$PATH
         PYTHON=`which python3`
-        (cd .. && ./bin/npm --python="${PYTHON}" install --no-optional)
-        (cd .. && ./bin/node ./ext/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js --python="${PYTHON}" rebuild)
+        (cd .. && ./bin/npm ci --omit-dev --python="${PYTHON}") 
       chdir: shiny-server/tmp
 
   - name: Install shiny-server

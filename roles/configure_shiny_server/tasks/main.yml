@@ -42,16 +42,6 @@
       group: root
       mode: "0655"
 
-- name: Create symlinks to the system version of pandoc
-  file:
-    path: "{{ item.path }}"
-    src: "{{ item.src }}"
-    state: link
-    force: true
-  with_items:
-    - path: /usr/local/shiny-server/ext/pandoc/pandoc
-      src: /usr/bin/pandoc
-
 - name: Create symlinks for the Shiny sample apps
   file:
     path: "{{ item.path }}"
