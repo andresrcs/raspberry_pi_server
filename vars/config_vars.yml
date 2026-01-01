@@ -62,7 +62,7 @@ r_version: ''       # e.g. '4.3.3'. Currently, you can only choose the R version
                     # installed with rig or compiled (with both 'use_r4pi' and 'use_rig' set to false).
 
 # Shiny-server version to install
-shiny_server_version: 'v1.5.22.1017'
+shiny_server_version: 'v1.5.23.1030'
 
 # RStudio version to install
-rstudio_version: '2024.07.0-daily+212'
+rstudio_version: '2026.01.0+392'
